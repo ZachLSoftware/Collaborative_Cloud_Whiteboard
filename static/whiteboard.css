@@ -1,0 +1,35 @@
+html,
+body {
+  display:flex;
+  margin:0;
+  padding:0;
+}
+
+#toolbar{
+  position: relative;
+  height: 100vh;
+  max-width: 20%;
+}
+
+.header {
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+  font-size: 30px;
+}
+
+.whiteboard{
+  position:absolute;
+  left:0;
+  right:0;
+}
+
+#canvas {
+  z-index: 2;
+}
+#overlay{
+  z-index:1;
+}
+#lineThickness{
+  width: 85%;
+}
