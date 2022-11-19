@@ -1,11 +1,4 @@
 
-/*var app = require('express')();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http,{
-    cors: {
-        origin: "*"
-      }
-});*/
 let state={};
 const { Server } = require('socket.io');
 const { createClient } = require("redis");
@@ -25,8 +18,7 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
 
 
 io.on('connection', (socket) => {
-    //socket.on("error",)
-    console.log('User ' + socket.id + 'online');
+
     
     socket.on("join", (data=>{
         if(!state[data]){state[data]=[]};
@@ -36,15 +28,12 @@ io.on('connection', (socket) => {
     }));
 
     socket.on("resize", (data=>{
-        socket.join(data);
         if(state[data].length>1){catchupClient(socket, data);}
     }));
 
     socket.on('canvas-data', (data => {
         let r = Array.from(socket.rooms)[1];
-        state[r].push(data);
         socket.to(r).emit('canvas-data', data);
-        console.log(state[r]);
     }))
 
     socket.on("clear", (data=>{
@@ -54,19 +43,12 @@ io.on('connection', (socket) => {
     }))
 })
 
-/*
-var server_port = process.env.YOUR_PORT || process.env.PORT || 3000;
-http.listen(server_port, () => {
-    console.log("Started on : " + server_port);
-});
-*/
-io.listen(3000);
-
 function catchupClient(socket, data){
     if(!(data in state)){
         state[data]=[];
     }
     if(state[data].length>0){
+        console.log(state[data]);
         socket.emit("catchup", state[data]);
     }
 }

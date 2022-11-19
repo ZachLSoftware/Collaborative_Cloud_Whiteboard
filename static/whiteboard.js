@@ -1,44 +1,67 @@
+
+//Get Canvas Context Elements
 const context = document.getElementById("canvas").getContext("2d");
 const overlay = document.getElementById("overlay").getContext("2d");
+
+//Initialize Canvas Variables
 let color = "#000000";
 let coord = {x:0, y:0};
 let lineThickness=1;
 let lineCap="round";
-let state=[];
+
+//Initialize shape array
 let current=[];
 windowSize();
-console.log($("#tool").val());
 
+//Resizes the client window. Resizing resets the canvas, so we get the canvas state and redraw
 $( window ).resize(function() {windowSize(); socket.emit("resize", room);});
 
-$("#colorPicker").val("#000000");
+//Reset color picker to default
+$("#colorPicker").val(color);
 $("#lineThickness").val(lineThickness);
+
+//When the color changes, set variable
 $("#colorPicker").change(function(){
     color=$(this).val();
 });
 
+//When line thickness changes set variable
 $("#lineThickness").change(function(){
     lineThickness=$(this).val();
 });
 
+//Get Mousedown event
 $("#canvas").mousedown(function(e){
+
+    //Push styling to array
     current.push({lineWidth:lineThickness, strokeStyle:color})
     startDraw(e);
 });
 
+//End Drawing
 $("#canvas").mouseup(function(e){stop(e)});
 
+
+//Handle clearing of the canvas
 $("#clearCanvas").click(function(){
     clearCanvas();
+
+    //Alert all sockets in room to clear
     socket.emit("clear","clear");
 });
 
+//Clears the canvas
 function clearCanvas(){
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+
+//Handles Resizing
 function windowSize() {
+    //Resets the edge of toolbar
     $(".whiteboard").css("left", 0+$("#toolbar").width());
+
+    //Resize both canvas
     context.canvas.width = document.documentElement.clientWidth-$("#toolbar").width();
     context.canvas.height = document.documentElement.clientHeight;
     overlay.canvas.width = document.documentElement.clientWidth-$("#toolbar").width();
@@ -46,6 +69,8 @@ function windowSize() {
 }
 
 function startDraw(e){
+
+    //Switch case based on Tool to set correct parameters
     switch($("#tool").val()){
         case "pencil":
             current[0]["tool"]="pencil";
@@ -53,6 +78,8 @@ function startDraw(e){
             break;
         case "square":
             current[0]["tool"]="square";
+
+            //Get starting corner of square
             reposition(e);
             current[0]["startX"]=coord.x;
             current[0]["startY"]=coord.y;
@@ -62,7 +89,7 @@ function startDraw(e){
             break;
     }
 
-    
+    //Reposition coordinates for next move
     reposition(e);
 }
 
@@ -99,52 +126,46 @@ function drawSquare(e, sx, sy){
 function reposition(e){
     coord.x=e.clientX - canvas.offsetLeft;
     coord.y=e.clientY - canvas.offsetTop;
-    
-
 }
 
+//Handle Catchup events. Send each shape to drawNewShape
 function catchup(state){
-    /*
     for(let i=0; i<state.length; i++){
         drawNewShape(state[i], true);
     }
-    */
-   var image = new Image();
-   image.onload=function() {
-    context.drawImage(image,0,0);
-   }
-   image.src=state;
-}
 
-async function redraw(){
-    if(state){
-        for(i=0; i<state.length; i++){
-                await drawNewShape(state[i]);
-            }
-    }
 }
 
 async function drawNewShape(current, catchup=false){
-    console.log("CURRENT",current);
+
+    //Handle each tool differently
     switch(current[0]["tool"]){
         case "pencil":
             for(let j=1; j<current.length; j++){
                 context.beginPath();
                 context.lineWidth=current[0]["lineWidth"];
-                context.lineCap=current[0]["lineCap"];
-                context.strokeStyle=current[0]["strokeStyle"];
+                context.lineCap="round";
                 context.moveTo(current[j]["moveTo"]["x"], current[j]["moveTo"]["y"]);
                 context.lineTo(current[j]["lineTo"]["x"], current[j]["lineTo"]["y"]);
                 context.stroke();
-                if("catchup"){
+
+                //If we are drawing real-time, animate
+                if(!catchup){
                     if(j+1!=current.length){
-                        await sleep(current[j+1]["time"]-current[j]["time"]-3);
+                        await sleep(current[j+1]["time"]-current[j]["time"]);
                     }
             }
             }
             break;
         case "square":
-            for(let j=1; j<current.length; j++){
+            
+            //If client is in catchup, just draw the last frame.
+            if(catchup){
+                j=current.length-1;
+            }else{j=1}
+
+            for(j; j<current.length; j++){
+                //If we are in the last frame set context to main canvas
                 if(j!=current.length-1){
                     ctx=overlay;
                 }else{ctx=context};
@@ -155,17 +176,19 @@ async function drawNewShape(current, catchup=false){
                 ctx.moveTo(current[0]["startX"],current[0]["startY"]);
                 ctx.rect(current[0]["startX"],current[0]["startY"], current[j]["endX"], current[j]["endY"]);
                 ctx.stroke();
+
+                //If not catching up, animate
                 if(!catchup){
                     if(j+1!=current.length){
                         await sleep(current[j+1]["time"]-current[j]["time"]-3);
                     }
                 }
-                
             }
             break;
         }
 }
 
+//Sleep function to provide animation
 function sleep(time) {
     return new Promise((resolve) => { 
       setTimeout(resolve, time);
@@ -174,11 +197,14 @@ function sleep(time) {
 
 function stop(e){
 
+    //Unbind mouse move event on draw
     $("#canvas").unbind("mousemove");
 
     switch($("#tool").val()){
         case "pencil":
             break;
+        
+        //If square, draw last shape on main canvas
         case "square":
             overlay.clearRect(0, 0, canvas.width, canvas.height);
             context.beginPath();
@@ -190,8 +216,9 @@ function stop(e){
 
     }
 
+        //Send new shape
         socket.emit("canvas-data", current);
-        current=[];
-  
 
+        //Clear current shape data
+        current=[];
 }
