@@ -23,17 +23,22 @@ io.on('connection', (socket) => {
     socket.on("join", (data=>{
         if(!state[data]){state[data]=[]};
         socket.join(data);
-        if(state[data].length>1){catchupClient(socket, data);}
+        catchupClient(socket, data);
         
     }));
 
     socket.on("resize", (data=>{
-        if(state[data].length>1){catchupClient(socket, data);}
+        catchupClient(socket, data);
     }));
 
     socket.on('canvas-data', (data => {
         let r = Array.from(socket.rooms)[1];
+        if(data.length>1){
+            if(data[0]["tool"]!="pencil" && data[0]["tool"]!="eraser"){
+                state[r].push([data[0],data[data.length-1]]);
+        }else{state[r].push(data)};
         socket.to(r).emit('canvas-data', data);
+        }
     }))
 
     socket.on("clear", (data=>{
@@ -48,7 +53,6 @@ function catchupClient(socket, data){
         state[data]=[];
     }
     if(state[data].length>0){
-        console.log(state[data]);
         socket.emit("catchup", state[data]);
     }
 }

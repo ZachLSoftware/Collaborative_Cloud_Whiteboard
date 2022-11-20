@@ -16,18 +16,26 @@
 <html>
     <body>
         <div id="toolbar" class="header">
+            <p>
             <label for="colorPicker">Choose Color:</label>
             <input type="color" id="colorPicker" value="#000000"/>
+            </P>
+            <p>
             <label for="lineThickness">Select Thickness:</label>
-            <input type="range" id="lineThickness" min="0" max="10" value="1" step="1"/>
+            <input type="range" id="lineThickness" min="1" max="50" value="5" step="5"/>
+            </p>
+            <p>
             <label for="tool">Pick Tool</label>
             <select id="tool" selected="pencil">
                 <option value="pencil">Pencil</option>
                 <option value="square">Square</option>
+                <option value="circle">Circle</option>
+                <option value="eraser">Eraser</option>
             </select>
-            <button id="saveCanvas">Save</button>
-            <button id="restoreCanvas">Restore</button>
+        </p>
+        <p>
             <button id="clearCanvas">Clear</button>
+        </p>
         </div>
         
         <canvas id="canvas" class="whiteboard"></canvas>

@@ -16,6 +16,10 @@ def whiteboard():
 
 @app.route('/newWhiteboard')
 def newWhiteboard():
+    room=request.args.get("room")
+    if(room):
+        return redirect('whiteboard?room='+room)
+    
     s=''
     s=s.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(20))
     return redirect('whiteboard?room='+s)

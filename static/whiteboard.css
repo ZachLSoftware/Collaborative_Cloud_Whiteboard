@@ -6,16 +6,17 @@ body {
 }
 
 #toolbar{
-  position: relative;
+  position: absolute;
   height: 100vh;
+  min-width: 15%;
   max-width: 20%;
 }
 
 .header {
   text-align: center;
-  background: #1abc9c;
+  background: #4bb0f4;
   color: white;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 .whiteboard{
@@ -25,11 +26,12 @@ body {
 }
 
 #canvas {
-  z-index: 2;
+  z-index: 1;
 }
 #overlay{
-  z-index:1;
+  z-index:2;
 }
 #lineThickness{
   width: 85%;
 }
+
