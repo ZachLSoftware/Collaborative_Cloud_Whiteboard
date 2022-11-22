@@ -1,4 +1,7 @@
-const socket = io.connect("http://localhost:5000");//"http://http://ec2-18-170-224-112.eu-west-2.compute.amazonaws.com/whiteboard?room=e7bmzX0VOlySCHozg13b:5050");
+//const socket = io.connect("http://localhost:5000");
+const socket = io.connect("http://whiteboardalb-825666193.eu-west-2.elb.amazonaws.com:3000",{
+        transports: ['websocket'],
+});
 
 socket.on("canvas-data", function(data){
     drawNewShape(data);
