@@ -1,10 +1,8 @@
-
-let result = [];
-
 //Get dependencies
 const { Server } = require('socket.io');
 const { Cluster } = require("ioredis");
 const { createAdapter } = require("@socket.io/redis-adapter");
+const redisHost = "whiteboardelasticcache.ikwtnf.clustercfg.euw2.cache.amazonaws.com";
 
 //Get servername
 const os = require("os");
@@ -22,7 +20,7 @@ var io=new Server({
 //Connect to AWS redis cluster
 const pubClient = new Cluster([
     { 
-        host: "whiteboardelasticcache.ikwtnf.clustercfg.euw2.cache.amazonaws.com", 
+        host: redisHost, 
         port: 6379 
     }
 ]);
@@ -120,7 +118,6 @@ async function catchupClient(socket, data){
     result.forEach((item,i) =>{
         state.push(JSON.parse(item));
    });
-   result = [];
 
     //Send data to client
     socket.emit("catchup", state);

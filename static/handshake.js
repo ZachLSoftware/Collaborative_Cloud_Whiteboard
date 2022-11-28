@@ -1,5 +1,7 @@
-const socket = io.connect("http://localhost:5000",{
-//const socket = io.connect("http://whiteboardalb-825666193.eu-west-2.elb.amazonaws.com:3000",{
+const socketServer = "http://whiteboardalb-825666193.eu-west-2.elb.amazonaws.com:3000";
+
+//const socket = io.connect("http://localhost:5000",{
+const socket = io.connect(socketServer,{
         transports: ['websocket'],
 });
 

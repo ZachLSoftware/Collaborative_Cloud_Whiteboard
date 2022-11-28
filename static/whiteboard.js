@@ -182,7 +182,6 @@ function reposition(e){
 
 //Handle Catchup events. Send each shape to drawNewShape
 function catchup(state){
-    console.log(state);
     for(let i=0; i<state.length; i++){
         drawNewShape(state[i], true);
     }
