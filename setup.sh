@@ -1,22 +1,21 @@
 #!/bin/bash
 
-apt-get install python3-venv -y
+#Install nginx HTTP Server
+sudo apt-get install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
 
-apt-get install nginx -y
-
-systemctl start nginx
-systemctl enable nginx
-
-cd whiteboard
-python3 -m venv venv
-
+#Install virtual Environment for Flask App
+sudo apt-get install python3-venv -y
+sudo python3 -m venv venv
 source venv/bin/activate
 
-pip install wheel
-pip install gunicorn flask
-
+#Install Flask Dependencies
+sudo pip install wheel
+sudo pip install gunicorn flask
 deactivate
 
+#Create Systemctl Service to start gunicorn
 echo '[Unit]
 Description=Gunicorn instance to serve Flask
 After=network.target
@@ -29,11 +28,12 @@ ExecStart=/home/ubuntu/whiteboard/venv/bin/gunicorn --bind 0.0.0.0:5000 wsgi:app
 [Install]
 WantedBy=multi-user.target' >> /etc/systemd/system/whiteboard.service
 
-systemctl daemon-reload
+#Refresh Dameon and enable flask application
+sudo systemctl daemon-reload
+sudo systemctl start whiteboard
+sudo systemctl enable whiteboard
 
-systemctl start whiteboard
-systemctl enable whiteboard
-
+#Create nginx configuration to point to flask
 echo "server {
     listen 80;
 
@@ -44,19 +44,21 @@ echo "server {
     }
 }" >> /etc/nginx/conf.d/whiteboard.conf
 
-systemctl restart nginx
-apt-get install nodejs
-apt-get install npm
-npm cache clean -f
-npm install -g n
-n stable
-cd /home/ubuntu/whiteboard/server
-npm install socket.io
-npm install @socket.io/redis-adapter ioredis
-npm install pm2@latest -g
+sudo systemctl restart nginx
 
-sudo -u ubuntu pm2 startup
+#Install dependencies for Node server
+sudo apt-get install nodejs
+sudo apt-get install npm
+sudo npm cache clean -f
+sudo npm install -g n
+sudo n stable
 
-env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+sudo npm install socket.io
+sudo npm install @socket.io/redis-adapter ioredis
+sudo npm install pm2@latest -g
 
-pm2 start /home/ubuntu/whiteboard/server/server.js
+#use pm2 to start node server automatically
+pm2 startup
+sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+sudo pm2 start /home/ubuntu/whiteboard/server/server.js
+pm2 save

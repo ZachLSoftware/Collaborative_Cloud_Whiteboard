@@ -2,7 +2,10 @@
 const { Server } = require('socket.io');
 const { Cluster } = require("ioredis");
 const { createAdapter } = require("@socket.io/redis-adapter");
-const redisHost = "whiteboardelasticcache.ikwtnf.clustercfg.euw2.cache.amazonaws.com";
+
+
+
+const redisHost = "whiteboarde.ikwtnf.clustercfg.euw2.cache.amazonaws.com";
 
 //Get servername
 const os = require("os");
