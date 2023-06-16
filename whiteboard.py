@@ -1,3 +1,11 @@
+"""
+    * Internet and Cloud Computing CO3219 - University of Leicester
+    * Group 7
+    * Authors - Zachary Larsen
+    *         - Dante Baptiste
+    *         - Matthew Elliott
+    *         - Alexander Bradshaw
+"""
 from flask import Flask, render_template, redirect, request
 import string
 import random
